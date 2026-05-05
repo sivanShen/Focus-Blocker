@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Blocker - 等待中</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="block.css">
+</head>
+<body>
+    <!-- Fullscreen click overlay -->
+    <div id="clickOverlay" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); z-index: 1000; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+        <h2 style="color: white; font-size: 2rem;">點擊任意處以開始倒數</h2>
+    </div>
+
+    <div class="container">
+        <div id="waitSection">
+            <div class="warning-icon">⏳</div>
+            <h1>深呼吸，稍微等一下</h1>
+            <div class="timer-container hidden" id="timerContainer">
+                <div id="timer" class="timer">00:00</div>
+            </div>
+        </div>
+
+        <div id="unlockSection" class="hidden">
+            <div class="success-icon">✅</div>
+            <h1>等待完成</h1>
+            <p>請選擇你這次想要使用的時間：</p>
+            
+            <div class="unlock-form">
+                <select id="durationSelect">
+                    <option value="5">5 分鐘</option>
+                    <option value="10">10 分鐘</option>
+                    <option value="15">15 分鐘</option>
+                </select>
+                <button id="unlockBtn" class="btn primary">確認解鎖全域限制</button>
+            </div>
+        </div>
+    </div>
+    <script src="block.js"></script>
+</body>
+</html>

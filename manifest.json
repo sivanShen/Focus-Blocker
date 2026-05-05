@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Focus Blocker",
+  "version": "1.0",
+  "description": "幫助你在特定時段內限制存取特定網站，並透過延遲機制降低衝動。",
+  "permissions": [
+    "storage",
+    "tabs",
+    "alarms",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html",
+  "action": {
+    "default_title": "開啟設定"
+  }
+}
