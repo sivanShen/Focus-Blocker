@@ -218,6 +218,17 @@ function startServer() {
         }
     });
 
+    serverApp.get('/block', (req, res) => {
+        res.send(`
+            <html>
+                <body style="background-color: #000; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; text-align: center; flex-direction: column;">
+                    <h1>此網站已被 Focus Blocker 封鎖</h1>
+                    <p style="color: #aaa; margin-top: 1rem; font-size: 1.2rem;">請開啟電腦上的 <b>Focus Blocker Desktop App</b> 以解除限制。</p>
+                </body>
+            </html>
+        `);
+    });
+
     serverApp.listen(17423, '127.0.0.1', () => {
         console.log('Local Extension Server running on 17423');
     });
