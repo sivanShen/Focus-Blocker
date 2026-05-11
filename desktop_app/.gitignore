@@ -1,0 +1,4 @@
+node_modules/
+dist/
+icon_base64.txt
+.DS_Store

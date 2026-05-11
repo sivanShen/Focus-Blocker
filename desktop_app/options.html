@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Blocker - 桌面版設定</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger-color: #ef4444;
+            --danger-hover: #dc2626;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border-color);
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .time-settings {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .time-group {
+            flex: 1;
+        }
+
+        .time-group label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        input[type="time"], input[type="text"] {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .btn.primary {
+            background-color: var(--primary-color);
+            color: white;
+            width: 100%;
+        }
+
+        .btn.primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn.danger {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn.danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .domain-list {
+            list-style: none;
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .domain-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .input-group input {
+            flex: 1;
+        }
+
+        .input-group .btn {
+            width: auto;
+        }
+        
+        .registry-box {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 1px dashed var(--primary-color);
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Focus Blocker Desktop</h1>
+            <p class="subtitle">桌面級防護，強制專注</p>
+        </header>
+
+        <section class="card">
+            <h2>瀏覽器擴充功能防護</h2>
+            <p class="subtitle" style="margin-bottom: 1rem;">將 Chrome 擴充功能寫入系統登錄檔，防止被停用或移除。</p>
+            <div class="registry-box">
+                <p style="margin-bottom: 1rem; font-size: 0.9rem;">您的擴充功能 ID (請先在 chrome://extensions 尋找):</p>
+                <div class="input-group">
+                    <input type="text" id="extIdInput" placeholder="例如：abcdefghijklmnop">
+                    <button id="lockExtBtn" class="btn primary">強制鎖定擴充功能</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>限制時段</h2>
+            <p class="subtitle">設定多個你想限制存取的時段</p>
+            <ul id="timeSlotsList" class="domain-list" style="margin-bottom: 1rem;"></ul>
+            <div class="time-settings">
+                <div class="time-group">
+                    <label for="startTime">開始時間</label>
+                    <input type="time" id="startTime" value="09:00">
+                </div>
+                <div class="time-group">
+                    <label for="endTime">結束時間</label>
+                    <input type="time" id="endTime" value="12:00">
+                </div>
+            </div>
+            <button id="addTimeSlotBtn" class="btn primary">新增時段</button>
+        </section>
+
+        <section class="card">
+            <h2>受限電腦軟體 (App Blocking)</h2>
+            <p class="subtitle">輸入執行檔名稱（例如：LeagueClient.exe 或 Discord.exe）</p>
+            <div class="input-group" style="margin-top: 1rem;">
+                <input type="text" id="appInput" placeholder="例如：Spotify.exe">
+                <button id="addAppBtn" class="btn primary">新增</button>
+            </div>
+            <ul id="appList" class="domain-list"></ul>
+        </section>
+
+        <section class="card">
+            <h2>受限網站名單 (Browser Blocking)</h2>
+            <p class="subtitle">輸入網域即可（例如：youtube.com）</p>
+            <div class="input-group" style="margin-top: 1rem;">
+                <input type="text" id="domainInput" placeholder="例如：facebook.com">
+                <button id="addDomainBtn" class="btn primary">新增</button>
+            </div>
+            <ul id="domainList" class="domain-list"></ul>
+        </section>
+
+        <section class="card">
+            <h2>例外白名單 (純網址比對)</h2>
+            <p class="subtitle">輸入網址中包含的關鍵字。符合的網頁將不會被封鎖。</p>
+            <div class="input-group" style="margin-top: 1rem;">
+                <input type="text" id="whitelistInput" placeholder="例如：v=12345">
+                <button id="addWhitelistBtn" class="btn primary">新增</button>
+            </div>
+            <ul id="whitelistList" class="domain-list"></ul>
+        </section>
+    </div>
+    <script src="options.js"></script>
+</body>
+</html>
