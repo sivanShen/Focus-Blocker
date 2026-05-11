@@ -5,7 +5,8 @@
   "description": "Desktop-managed Focus Blocker companion extension.",
   "permissions": [
     "tabs",
-    "webNavigation"
+    "webNavigation",
+    "alarms"
   ],
   "host_permissions": [
     "<all_urls>"
