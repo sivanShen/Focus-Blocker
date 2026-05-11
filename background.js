@@ -46,13 +46,18 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(checkNavigation);
 
 // --- Heartbeat System ---
 function sendHeartbeat() {
+    // Calling an extension API resets the Chrome MV3 30-second idle timer!
+    // This keeps the service worker awake indefinitely.
+    if (chrome.runtime && chrome.runtime.getPlatformInfo) {
+        chrome.runtime.getPlatformInfo(() => {});
+    }
     fetch('http://127.0.0.1:17423/heartbeat').catch(() => {});
 }
-// Send immediately, then every 5 seconds while SW is awake
+// Send immediately, then every 5 seconds
 sendHeartbeat();
 setInterval(sendHeartbeat, 5000);
 
-// Use alarms to wake up the SW periodically if it sleeps
+// Fallback alarm just in case Chrome still forces it to sleep
 chrome.alarms.create('heartbeat_wakeup', { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'heartbeat_wakeup') {

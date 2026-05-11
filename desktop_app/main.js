@@ -235,7 +235,7 @@ function showPauseWindow() {
 
 function showHostageWindow() {
     if (hostageWindow) return;
-    hostageCountdown = 60;
+    hostageCountdown = 90;
     hostageWindow = new BrowserWindow({
         width: 550, height: 250, alwaysOnTop: true, frame: false, resizable: false,
         webPreferences: { preload: path.join(__dirname, 'preload.js') }
@@ -280,7 +280,7 @@ function checkHeartbeatAndHostage() {
         const isChromeRunning = stdout.toLowerCase().includes('chrome.exe');
         
         if (isChromeRunning) {
-            if (timeSinceHeartbeat > 20000 && pauseUntil === 0) {
+            if (timeSinceHeartbeat > 45000 && pauseUntil === 0) {
                 showPauseWindow();
             } else if (pauseUntil > 0 && Date.now() > pauseUntil) {
                 showHostageWindow();
@@ -291,7 +291,7 @@ function checkHeartbeatAndHostage() {
                 hostageWindow.destroy();
                 hostageWindow = null;
                 clearInterval(hostageTimerInterval);
-                hostageCountdown = 60; // Reset for next time
+                hostageCountdown = 90; // Reset for next time
             }
         }
     });
@@ -300,7 +300,7 @@ function checkHeartbeatAndHostage() {
 function startWindowMonitor() {
     const psScript = path.join(__dirname, 'window_monitor.ps1');
     if (!fs.existsSync(psScript)) {
-        fs.writeFileSync(psScript, \`Add-Type @"
+        fs.writeFileSync(psScript, `Add-Type @"
   using System;
   using System.Runtime.InteropServices;
   public class Win32 {
@@ -319,7 +319,7 @@ while ($true) {
         Write-Host ""
     }
     Start-Sleep -Seconds 1
-}\`);
+}`);
     }
 
     activeWindowMonitorProcess = spawn('powershell', ['-ExecutionPolicy', 'Bypass', '-File', psScript]);
