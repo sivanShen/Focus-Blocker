@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人質挾持</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ef4444; /* Blood red */
+            color: white;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            text-align: center;
+            -webkit-app-region: drag; /* Allow dragging */
+        }
+        h2 { margin: 0 0 10px 0; font-size: 1.5rem; text-transform: uppercase; font-weight: 800;}
+        p { margin: 0 0 15px 0; font-size: 1rem; max-width: 90%; }
+        #countdown { font-size: 3rem; font-weight: 800; tabular-nums; }
+        .blink { animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+    </style>
+</head>
+<body>
+    <h2>🚨 暫停時間已結束</h2>
+    <p>請立刻回到 chrome://extensions 手動開啟 Focus Blocker (Drone)，否則瀏覽器將被強制關閉！</p>
+    <div id="countdown" class="blink">60</div>
+    <script src="hostage.js"></script>
+</body>
+</html>

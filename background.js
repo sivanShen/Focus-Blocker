@@ -43,3 +43,19 @@ async function checkNavigation(details) {
 
 chrome.webNavigation.onBeforeNavigate.addListener(checkNavigation);
 chrome.webNavigation.onHistoryStateUpdated.addListener(checkNavigation);
+
+// --- Heartbeat System ---
+function sendHeartbeat() {
+    fetch('http://127.0.0.1:17423/heartbeat').catch(() => {});
+}
+// Send immediately, then every 5 seconds while SW is awake
+sendHeartbeat();
+setInterval(sendHeartbeat, 5000);
+
+// Use alarms to wake up the SW periodically if it sleeps
+chrome.alarms.create('heartbeat_wakeup', { periodInMinutes: 1 });
+chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === 'heartbeat_wakeup') {
+        sendHeartbeat();
+    }
+});

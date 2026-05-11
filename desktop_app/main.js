@@ -3,11 +3,18 @@ const path = require('path');
 const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 
 let tray = null;
 let settingsWindow = null;
 let blockWindow = null;
+let pauseWindow = null;
+let hostageWindow = null;
+let lastHeartbeatTime = Date.now();
+let pauseUntil = 0;
+let hostageCountdown = 60;
+let hostageTimerInterval = null;
+let activeWindowMonitorProcess = null;
 
 const configPath = path.join(app.getPath('userData'), 'focus_config.json');
 
@@ -164,6 +171,14 @@ ipcMain.handle('cancel-unlock', () => {
     }
 });
 
+ipcMain.handle('pause-extension', (event, minutes) => {
+    pauseUntil = Date.now() + minutes * 60 * 1000;
+    if (pauseWindow) {
+        pauseWindow.destroy();
+        pauseWindow = null;
+    }
+});
+
 ipcMain.handle('unlock-domain', (event, durationMinutes) => {
     const expiry = Date.now() + durationMinutes * 60 * 1000;
     const today = getTodayString();
@@ -208,6 +223,116 @@ function checkRunningProcesses() {
     });
 }
 
+function showPauseWindow() {
+    if (pauseWindow || hostageWindow) return;
+    pauseWindow = new BrowserWindow({
+        width: 400, height: 400, alwaysOnTop: true, frame: false, resizable: false,
+        webPreferences: { preload: path.join(__dirname, 'preload.js') }
+    });
+    pauseWindow.loadFile('pause.html');
+    pauseWindow.on('close', (e) => { e.preventDefault(); });
+}
+
+function showHostageWindow() {
+    if (hostageWindow) return;
+    hostageCountdown = 60;
+    hostageWindow = new BrowserWindow({
+        width: 550, height: 250, alwaysOnTop: true, frame: false, resizable: false,
+        webPreferences: { preload: path.join(__dirname, 'preload.js') }
+    });
+    // Set position to top center so it doesn't block the whole screen
+    const { screen } = require('electron');
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { width } = primaryDisplay.workAreaSize;
+    hostageWindow.setPosition(Math.round((width - 550) / 2), 50);
+
+    hostageWindow.loadFile('hostage.html');
+    hostageWindow.on('close', (e) => { e.preventDefault(); });
+
+    hostageTimerInterval = setInterval(() => {
+        hostageCountdown--;
+        if (hostageWindow && !hostageWindow.isDestroyed()) {
+            hostageWindow.webContents.send('hostage-tick', hostageCountdown);
+        }
+        if (hostageCountdown <= 0) {
+            exec('taskkill /F /IM chrome.exe', () => {
+                // chrome is killed. checkHeartbeatAndHostage will reset the state.
+            });
+        }
+    }, 1000);
+}
+
+function checkHeartbeatAndHostage() {
+    if (!isTimeRestricted() || isGloballyUnlocked()) {
+        pauseUntil = 0; // Reset if time becomes unrestricted
+        if (pauseWindow) { pauseWindow.destroy(); pauseWindow = null; }
+        if (hostageWindow) {
+            hostageWindow.destroy(); hostageWindow = null;
+            clearInterval(hostageTimerInterval);
+        }
+        return;
+    }
+
+    const timeSinceHeartbeat = Date.now() - lastHeartbeatTime;
+    
+    // Check if Chrome is running
+    exec('tasklist /FI "IMAGENAME eq chrome.exe" /NH', (err, stdout) => {
+        const isChromeRunning = stdout.toLowerCase().includes('chrome.exe');
+        
+        if (isChromeRunning) {
+            if (timeSinceHeartbeat > 20000 && pauseUntil === 0) {
+                showPauseWindow();
+            } else if (pauseUntil > 0 && Date.now() > pauseUntil) {
+                showHostageWindow();
+            }
+        } else {
+            // Chrome is closed. Hide hostage window and reset for next launch.
+            if (hostageWindow) {
+                hostageWindow.destroy();
+                hostageWindow = null;
+                clearInterval(hostageTimerInterval);
+                hostageCountdown = 60; // Reset for next time
+            }
+        }
+    });
+}
+
+function startWindowMonitor() {
+    const psScript = path.join(__dirname, 'window_monitor.ps1');
+    if (!fs.existsSync(psScript)) {
+        fs.writeFileSync(psScript, \`Add-Type @"
+  using System;
+  using System.Runtime.InteropServices;
+  public class Win32 {
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")]
+    public static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder text, int count);
+  }
+"@
+while ($true) {
+    $handle = [Win32]::GetForegroundWindow()
+    $sb = New-Object System.Text.StringBuilder 256
+    if ([Win32]::GetWindowText($handle, $sb, 256) -gt 0) {
+        Write-Host $sb.ToString()
+    } else {
+        Write-Host ""
+    }
+    Start-Sleep -Seconds 1
+}\`);
+    }
+
+    activeWindowMonitorProcess = spawn('powershell', ['-ExecutionPolicy', 'Bypass', '-File', psScript]);
+    activeWindowMonitorProcess.stdout.on('data', (data) => {
+        const title = data.toString().trim();
+        if ((title.includes('擴充功能') || title.includes('Extensions')) && title.includes('Google Chrome')) {
+            if (isTimeRestricted() && !isGloballyUnlocked()) {
+                showBlockScreen('chrome://extensions');
+            }
+        }
+    });
+}
+
 // Local Express Server for Chrome Extension
 function startServer() {
     const serverApp = express();
@@ -223,6 +348,21 @@ function startServer() {
         } else {
             res.json({ restricted: false });
         }
+    });
+
+    serverApp.get('/heartbeat', (req, res) => {
+        lastHeartbeatTime = Date.now();
+        pauseUntil = 0; // Reset any pause state since we received a heartbeat
+        if (hostageWindow) {
+            hostageWindow.destroy();
+            hostageWindow = null;
+            clearInterval(hostageTimerInterval);
+        }
+        if (pauseWindow) {
+            pauseWindow.destroy();
+            pauseWindow = null;
+        }
+        res.send('ok');
     });
 
     serverApp.get('/block', (req, res) => {
@@ -268,7 +408,9 @@ app.whenReady().then(() => {
     tray.setToolTip('Focus Blocker');
     tray.setContextMenu(contextMenu);
 
-    setInterval(checkRunningProcesses, 2000); // Check every 2 seconds
+    startWindowMonitor();
+    setInterval(checkRunningProcesses, 2000); // Check blocked apps
+    setInterval(checkHeartbeatAndHostage, 5000); // Check extension heartbeat
     
     // Prevent app from exiting when windows are closed
     app.on('window-all-closed', (e) => {
