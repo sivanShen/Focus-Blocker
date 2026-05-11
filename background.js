@@ -12,10 +12,10 @@ async function fetchStatus() {
     }
 }
 
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-    if (!changeInfo.url) return;
-    const url = changeInfo.url;
-    if (url.startsWith('chrome://') || url.startsWith('chrome-extension://')) return;
+async function checkNavigation(details) {
+    if (details.frameId !== 0) return; // Only apply to top-level main frame
+    const url = details.url;
+    if (url.startsWith('chrome://') || url.startsWith('chrome-extension://') || url.startsWith('http://127.0.0.1:17423/')) return;
 
     try {
         const urlObj = new URL(url);
@@ -36,7 +36,10 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         }
 
         // Redirect to the local server's block page to avoid Chrome's data: URI restrictions
-        chrome.tabs.update(tabId, { url: 'http://127.0.0.1:17423/block' });
+        chrome.tabs.update(details.tabId, { url: 'http://127.0.0.1:17423/block' });
 
     } catch (e) {}
-});
+}
+
+chrome.webNavigation.onBeforeNavigate.addListener(checkNavigation);
+chrome.webNavigation.onHistoryStateUpdated.addListener(checkNavigation);

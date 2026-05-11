@@ -5,5 +5,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     saveConfig: (config) => ipcRenderer.invoke('save-config', config),
     getWaitTime: () => ipcRenderer.invoke('get-wait-time'),
     unlockDomain: (duration) => ipcRenderer.invoke('unlock-domain', duration),
-    checkAccess: () => ipcRenderer.invoke('check-access')
+    checkAccess: () => ipcRenderer.invoke('check-access'),
+    cancelUnlock: () => ipcRenderer.invoke('cancel-unlock')
 });

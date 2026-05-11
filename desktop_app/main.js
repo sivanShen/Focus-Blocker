@@ -157,6 +157,13 @@ ipcMain.handle('get-wait-time', () => {
     return waitSeconds;
 });
 
+ipcMain.handle('cancel-unlock', () => {
+    if (blockWindow) {
+        blockWindow.destroy();
+        blockWindow = null;
+    }
+});
+
 ipcMain.handle('unlock-domain', (event, durationMinutes) => {
     const expiry = Date.now() + durationMinutes * 60 * 1000;
     const today = getTodayString();

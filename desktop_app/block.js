@@ -10,12 +10,15 @@ const progressFill = document.getElementById('progressFill');
 const actionArea = document.getElementById('actionArea');
 const unlockBtn = document.getElementById('unlockBtn');
 const durationSelect = document.getElementById('duration');
+const cancelOverlayBtn = document.getElementById('cancelOverlayBtn');
+const cancelActionBtn = document.getElementById('cancelActionBtn');
 
 document.addEventListener('DOMContentLoaded', async () => {
     waitTimeSeconds = await window.electronAPI.getWaitTime();
 });
 
-overlay.addEventListener('click', () => {
+overlay.addEventListener('click', (e) => {
+    if (e.target === cancelOverlayBtn) return; // Let the button handler take care of it
     overlay.style.display = 'none';
     document.body.style.cursor = 'default';
     startCountdown();
@@ -80,3 +83,10 @@ unlockBtn.addEventListener('click', async () => {
     await window.electronAPI.unlockDomain(duration);
     // The window will be destroyed by the backend upon success
 });
+
+async function handleCancel() {
+    await window.electronAPI.cancelUnlock();
+}
+
+cancelOverlayBtn.addEventListener('click', handleCancel);
+cancelActionBtn.addEventListener('click', handleCancel);

@@ -155,7 +155,10 @@
 <body>
 
     <div id="interactiveOverlay" class="interactive-overlay">
-        <div class="interactive-text">點擊任意處開始倒數</div>
+        <div style="text-align: center;">
+            <div class="interactive-text" style="margin-bottom: 20px;">點擊任意處開始倒數</div>
+            <button id="cancelOverlayBtn" class="btn" style="background-color: transparent; border: 1px solid #555; color: #a0a0a0; font-size: 1rem; padding: 0.5rem 1rem;">放棄解鎖 / 返回</button>
+        </div>
     </div>
 
     <div class="icon-container">
@@ -174,11 +177,14 @@
     </div>
 
     <div id="actionArea">
-        <select id="duration" class="duration-select">
-            <option value="5">解鎖 5 分鐘</option>
-            <option value="15">解鎖 15 分鐘</option>
-        </select>
-        <button id="unlockBtn" class="btn">解鎖全局</button>
+        <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+            <select id="duration" class="duration-select">
+                <option value="5">解鎖 5 分鐘</option>
+                <option value="15">解鎖 15 分鐘</option>
+            </select>
+            <button id="unlockBtn" class="btn">解鎖全局</button>
+        </div>
+        <button id="cancelActionBtn" class="btn" style="background-color: transparent; border: 1px solid #555; color: #a0a0a0; font-size: 1rem; padding: 0.5rem 1rem;">放棄解鎖 / 返回</button>
     </div>
 
     <script src="block.js"></script>
